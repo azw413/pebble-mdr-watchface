@@ -2,37 +2,58 @@
 #include "layout.h"
 
 #define FIELD_MAX_CELLS (20 * 20)
+#define GLYPH_W 5
+#define GLYPH_H 7
+
+// Thin 5x7 digits, 1px strokes. One byte per row; bit 4 is the leftmost pixel.
+static const uint8_t GLYPHS[10][GLYPH_H] = {
+  {0x0E, 0x11, 0x11, 0x11, 0x11, 0x11, 0x0E},  // 0
+  {0x04, 0x0C, 0x04, 0x04, 0x04, 0x04, 0x0E},  // 1
+  {0x0E, 0x11, 0x01, 0x02, 0x04, 0x08, 0x1F},  // 2
+  {0x1F, 0x02, 0x04, 0x02, 0x01, 0x11, 0x0E},  // 3
+  {0x02, 0x06, 0x0A, 0x12, 0x1F, 0x02, 0x02},  // 4
+  {0x1F, 0x10, 0x1E, 0x01, 0x01, 0x11, 0x0E},  // 5
+  {0x06, 0x08, 0x10, 0x1E, 0x11, 0x11, 0x0E},  // 6
+  {0x1F, 0x01, 0x02, 0x04, 0x08, 0x08, 0x08},  // 7
+  {0x0E, 0x11, 0x11, 0x0E, 0x11, 0x11, 0x0E},  // 8
+  {0x0E, 0x11, 0x11, 0x0F, 0x01, 0x02, 0x0C},  // 9
+};
 
 static GBitmap *s_bitmap;
 static GColor *s_palette;       // [0] background (black), [1] digit colour
-static GFont s_font;
-static bool s_built;
 static uint8_t s_digits[FIELD_MAX_CELLS];
+static int16_t s_y0;            // grid y origin for the current layout
 
-static int16_t cell_x(int c) { return (int16_t)(c * LAYOUT.field.cell_w2 / 2); }
-static int16_t cell_w(int c) { return (int16_t)(cell_x(c + 1) - cell_x(c)); }
-
-static bool cell_visible(int c, int r, GSize size) {
-  if (!LAYOUT.field.round_clip) return true;
-  // Keep a cell only if its whole box is inside the display circle.
-  const int32_t cx = size.w / 2, cy = size.h / 2, rad = size.w / 2;
-  const int16_t x0 = cell_x(c), x1 = cell_x(c) + cell_w(c);
-  const int16_t y0 = r * LAYOUT.field.cell_h, y1 = y0 + LAYOUT.field.cell_h;
-  const int16_t xs[2] = {x0, x1}, ys[2] = {y0, y1};
-  for (int i = 0; i < 2; i++) {
-    for (int j = 0; j < 2; j++) {
-      int32_t dx = xs[i] - cx, dy = ys[j] - cy;
-      if (dx * dx + dy * dy > rad * rad) return false;
+// Plot (or clear) one cell's glyph in the field bitmap.
+static void blit_cell(int c, int r, int digit, bool on) {
+  uint8_t *data = gbitmap_get_data(s_bitmap);
+  const uint16_t bpr = gbitmap_get_bytes_per_row(s_bitmap);
+  const GSize size = gbitmap_get_bounds(s_bitmap).size;
+  const FieldLayout *f = &LAYOUT.field;
+  const int x0 = f->x0 + c * f->cell_w + (f->cell_w - GLYPH_W) / 2;
+  const int y0 = s_y0 + r * f->cell_h + (f->cell_h - GLYPH_H) / 2;
+  for (int gy = 0; gy < GLYPH_H; gy++) {
+    const int y = y0 + gy;
+    if (y < 0 || y >= size.h) continue;
+    for (int gx = 0; gx < GLYPH_W; gx++) {
+      const int x = x0 + gx;
+      if (x < 0 || x >= size.w) continue;
+      uint8_t *byte = &data[y * bpr + x / 8];
+      const uint8_t mask = (uint8_t)(0x80 >> (x % 8));  // 1-bit palettised: MSB first
+      if (on && (GLYPHS[digit][gy] & (0x10 >> gx))) *byte |= mask;
+      else if (!on) *byte &= (uint8_t)~mask;
     }
   }
-  return true;
 }
 
-void field_init(GFont digit_font) {
-  s_font = digit_font;
-  // Same Park-Miller sequence as the prototypes' renderVals() (seed 7, row-major).
-  uint32_t seed = 7;
-  const int n = LAYOUT.field.cols * LAYOUT.field.rows;
+void field_init(GSize screen, int16_t y0) {
+  s_y0 = y0;
+  // Same Park-Miller sequence as the prototypes' renderVals() (row-major). On
+  // gabbro the round display clips the grid to the circle per pixel, as the
+  // prototype's border-radius does.
+  const FieldLayout *f = &LAYOUT.field;
+  uint32_t seed = f->seed;
+  const int n = f->cols * f->rows;
   for (int i = 0; i < n && i < FIELD_MAX_CELLS; i++) {
     seed = (uint32_t)(((uint64_t)seed * 16807u) % 2147483647u);
     s_digits[i] = seed % 10;
@@ -40,6 +61,11 @@ void field_init(GFont digit_font) {
   s_palette = malloc(2 * sizeof(GColor));
   s_palette[0] = GColorBlack;
   s_palette[1] = GColorMidnightGreen;
+  s_bitmap = gbitmap_create_blank_with_palette(screen, GBitmapFormat1BitPalette, s_palette, true);
+  if (!s_bitmap) return;
+  for (int r = 0; r < f->rows; r++) {
+    for (int c = 0; c < f->cols; c++) blit_cell(c, r, s_digits[r * f->cols + c], true);
+  }
 }
 
 void field_deinit(void) {
@@ -49,46 +75,11 @@ void field_deinit(void) {
   s_palette = NULL;
 }
 
-void field_set_color(GColor c) { s_palette[1] = c; }
-
-// Draw every digit as white text, then copy lit framebuffer pixels into the bitmap.
-static void build(GContext *ctx, GRect bounds) {
-  s_bitmap = gbitmap_create_blank_with_palette(bounds.size, GBitmapFormat1BitPalette,
-                                               s_palette, true);
-  if (!s_bitmap) return;
-
-  graphics_context_set_fill_color(ctx, GColorBlack);
-  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
-  graphics_context_set_text_color(ctx, GColorWhite);
-  char buf[2] = {0, 0};
-  for (int r = 0; r < LAYOUT.field.rows; r++) {
-    for (int c = 0; c < LAYOUT.field.cols; c++) {
-      if (!cell_visible(c, r, bounds.size)) continue;
-      buf[0] = '0' + s_digits[r * LAYOUT.field.cols + c];
-      GRect rc = GRect(cell_x(c) + LAYOUT.field.dx, r * LAYOUT.field.cell_h + LAYOUT.field.cap_top - LAYOUT.ss_cap_off,
-                       cell_w(c), LAYOUT.field.cell_h + LAYOUT.ss_cap_off);
-      graphics_draw_text(ctx, buf, s_font, rc, GTextOverflowModeFill, GTextAlignmentCenter, NULL);
-    }
-  }
-
-  GBitmap *fb = graphics_capture_frame_buffer(ctx);
-  if (!fb) return;
-  uint8_t *dst = gbitmap_get_data(s_bitmap);
-  const uint16_t dst_bpr = gbitmap_get_bytes_per_row(s_bitmap);
-  for (int y = 0; y < bounds.size.h; y++) {
-    GBitmapDataRowInfo row = gbitmap_get_data_row_info(fb, y);
-    for (int x = row.min_x; x <= row.max_x; x++) {
-      if (row.data[x] != GColorBlack.argb) {
-        dst[y * dst_bpr + x / 8] |= (uint8_t)(0x80 >> (x % 8));  // MSB-first
-      }
-    }
-  }
-  graphics_release_frame_buffer(ctx, fb);
-  s_built = true;
+void field_set_color(GColor c) {
+  if (s_palette) s_palette[1] = c;
 }
 
 void field_draw(GContext *ctx, GRect bounds) {
-  if (!s_built) build(ctx, bounds);
   if (!s_bitmap) return;
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
   graphics_draw_bitmap_in_rect(ctx, s_bitmap, bounds);

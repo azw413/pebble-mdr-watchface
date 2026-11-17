@@ -1,22 +1,28 @@
-// MDR watchface: static Layout A (docs/DESIGN_SPEC.md section 4.3).
+// MDR watchface: layouts A "Standard" and B "Large" (docs/DESIGN_SPEC.md 4.3, 4.4).
 #include <pebble.h>
 #include <pebble-fctx/fctx.h>
 #include <pebble-fctx/ffont.h>
 #include "layout.h"
 #include "field.h"
 #include "michroma_metrics.h"
+#include "settings.h"
+#include "theme.h"
 
-// Palette roles (spec section 2).
-#define COL_TIME   GColorCeleste
-#define COL_ACCENT GColorCadetBlue
-#define COL_DATE   GColorCadetBlue
-#define COL_TRACK  GColorMidnightGreen
-#define COL_LOW    GColorSunsetOrange
+// Palette roles (spec section 2), taken from the user's colour theme.
+static Theme s_theme;
+#define COL_TIME   (s_theme.bright)
+#define COL_ACCENT (s_theme.accent)
+#define COL_DATE   (s_theme.accent)
+#define COL_TRACK  (s_theme.field)
+#define COL_LOW    (s_theme.low)
 
 static Window *s_window;
 static Layer *s_field_layer, *s_hud_layer, *s_time_layer;
 static FFont *s_michroma;
-static GFont s_ss8, s_ss_label;  // field digits; header and bin labels
+static GFont s_ss_label;  // Silkscreen: battery percentage and bin labels
+
+static Settings s_settings;
+#define s_layout (s_settings.layout)
 
 static char s_time[6] = "00:00";
 static char s_date[12] = "";
@@ -92,14 +98,24 @@ static void draw_bins(GContext *ctx, const LayoutA *a) {
   }
 }
 
+static void draw_band(GContext *ctx, int16_t w, int16_t y0, int16_t y1) {
+  fill(ctx, GColorBlack, GRect(0, y0, w, y1 - y0 + 1));
+  fill(ctx, COL_ACCENT, GRect(0, y0, w, 1));
+  fill(ctx, COL_ACCENT, GRect(0, y1, w, 1));
+}
+
 static void hud_update(Layer *layer, GContext *ctx) {
-  const GRect bounds = layer_get_bounds(layer);
-  const LayoutA *a = &LAYOUT.a;
-  draw_header(ctx, &LAYOUT.header_a);
-  fill(ctx, GColorBlack, GRect(0, a->band_y0, bounds.size.w, a->band_y1 - a->band_y0 + 1));
-  fill(ctx, COL_ACCENT, GRect(0, a->band_y0, bounds.size.w, 1));
-  fill(ctx, COL_ACCENT, GRect(0, a->band_y1, bounds.size.w, 1));
-  draw_bins(ctx, a);
+  const int16_t w = layer_get_bounds(layer).size.w;
+  if (s_layout == LAYOUT_A) {
+    const LayoutA *a = &LAYOUT.a;
+    draw_header(ctx, &a->header);
+    draw_band(ctx, w, a->band_y0, a->band_y1);
+    draw_bins(ctx, a);
+  } else {
+    const LayoutB *b = &LAYOUT.b;
+    draw_header(ctx, &b->header);
+    draw_band(ctx, w, b->band_y0, b->band_y1);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -131,24 +147,48 @@ static void draw_tabular(FContext *fctx, const char *s, int px, fixed_t cx, fixe
   }
 }
 
+static void draw_date(FContext *fctx, int px, fixed_t cx, fixed_t cy) {
+  fctx_set_fill_color(fctx, COL_DATE);
+  fctx_set_text_em_height(fctx, s_michroma, px);
+  fctx_set_offset(fctx, FPoint(cx, cy));
+  fctx_begin_fill(fctx);
+  fctx_draw_string(fctx, s_date, s_michroma, GTextAlignmentCenter, FTextAnchorCapMiddle);
+  fctx_end_fill(fctx);
+}
+
 static void time_update(Layer *layer, GContext *ctx) {
   const GRect bounds = layer_get_bounds(layer);
-  const LayoutA *a = &LAYOUT.a;
   const fixed_t cx = INT_TO_FIXED(bounds.size.w) / 2;
 
   FContext fctx;
+  if (s_layout == LAYOUT_B) {
+    // Black backing box so the field doesn't show through behind the date. Drawn
+    // before the main fctx pass so plain graphics calls never overlap an fctx context.
+    const LayoutB *b = &LAYOUT.b;
+    fctx_init_context(&fctx, ctx);
+    fctx_set_text_em_height(&fctx, s_michroma, b->date_px);
+    const int16_t w = FIXED_TO_INT(fctx_string_width(&fctx, s_date, s_michroma) + FIX1 - 1);
+    fctx_deinit_context(&fctx);
+    fill(ctx, GColorBlack, GRect(bounds.size.w / 2 - w / 2 - b->date_box_pad, b->date_box_y,
+                                 w + 2 * b->date_box_pad, b->date_box_h));
+  }
+
   fctx_init_context(&fctx, ctx);
-
   fctx_set_fill_color(&fctx, COL_TIME);
-  fctx_set_text_em_height(&fctx, s_michroma, a->time_px);
-  draw_tabular(&fctx, s_time, a->time_px, cx, INT_TO_FIXED(a->time_cy));
 
-  fctx_set_fill_color(&fctx, COL_DATE);
-  fctx_set_text_em_height(&fctx, s_michroma, a->date_px);
-  fctx_set_offset(&fctx, FPoint(cx, INT_TO_FIXED(a->date_cy)));
-  fctx_begin_fill(&fctx);
-  fctx_draw_string(&fctx, s_date, s_michroma, GTextAlignmentCenter, FTextAnchorCapMiddle);
-  fctx_end_fill(&fctx);
+  if (s_layout == LAYOUT_A) {
+    const LayoutA *a = &LAYOUT.a;
+    fctx_set_text_em_height(&fctx, s_michroma, a->time_px);
+    draw_tabular(&fctx, s_time, a->time_px, cx, a->time_cy);
+    draw_date(&fctx, a->date_px, cx, a->date_cy);
+  } else {
+    const LayoutB *b = &LAYOUT.b;
+    char hh[3] = {s_time[0], s_time[1], 0};
+    fctx_set_text_em_height(&fctx, s_michroma, b->digit_px);
+    draw_tabular(&fctx, hh, b->digit_px, cx, b->hours_cy);
+    draw_tabular(&fctx, s_time + 3, b->digit_px, cx, b->mins_cy);
+    draw_date(&fctx, b->date_px, cx, b->date_cy);
+  }
 
   fctx_deinit_context(&fctx);
 }
@@ -185,6 +225,31 @@ static void battery_handler(BatteryChargeState st) {
 }
 
 // ---------------------------------------------------------------------------
+// Settings
+
+static void build_field(void) {
+  field_deinit();
+  field_init(GSize(PBL_DISPLAY_WIDTH, PBL_DISPLAY_HEIGHT),
+             s_layout == LAYOUT_A ? LAYOUT.a.field_y0 : LAYOUT.b.field_y0);
+  field_set_color(s_theme.field);
+}
+
+static void apply_settings(bool layout_changed) {
+  s_theme = theme_get(s_settings.theme);
+  if (layout_changed) build_field();  // each layout has its own grid offset
+  else field_set_color(s_theme.field);
+  if (s_field_layer) layer_mark_dirty(s_field_layer);
+}
+
+static void inbox_received(DictionaryIterator *iter, void *context) {
+  const LayoutId old_layout = s_layout;
+  if (settings_update_from_message(&s_settings, iter)) {
+    settings_save(&s_settings);
+    apply_settings(s_layout != old_layout);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Window
 
 static void window_load(Window *w) {
@@ -209,13 +274,13 @@ static void window_unload(Window *w) {
 
 static void init(void) {
   s_michroma = ffont_create_from_resource(RESOURCE_ID_FFONT_MICHROMA);
-  s_ss8 = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SILKSCREEN_8));
 #ifdef PBL_PLATFORM_BASALT
-  s_ss_label = s_ss8;
+  s_ss_label = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SILKSCREEN_8));
 #else
   s_ss_label = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_SILKSCREEN_16));
 #endif
-  field_init(s_ss8);
+  s_settings = settings_load();
+  apply_settings(true);
 
   s_window = window_create();
   window_set_background_color(s_window, GColorBlack);
@@ -227,15 +292,18 @@ static void init(void) {
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   battery_handler(battery_state_service_peek());
   battery_state_service_subscribe(battery_handler);
+
+  app_message_register_inbox_received(inbox_received);
+  app_message_open(256, 64);
 }
 
 static void deinit(void) {
+  app_message_deregister_callbacks();
   battery_state_service_unsubscribe();
   tick_timer_service_unsubscribe();
   window_destroy(s_window);
   field_deinit();
-  if (s_ss_label != s_ss8) fonts_unload_custom_font(s_ss_label);
-  fonts_unload_custom_font(s_ss8);
+  fonts_unload_custom_font(s_ss_label);
   ffont_destroy(s_michroma);
 }
 

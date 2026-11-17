@@ -8,16 +8,16 @@ A Pebble watchface inspired by the *Severance* MDR screens. **Read `docs/DESIGN_
 
 ## Rendering decisions (fixed)
 - Time and date: **Michroma**, anti-aliased, sub-pixel positioned, scalable for the animation. Use **pebble-fctx**, which requires converting Michroma to its font format; check the current toolchain for that.
-- Small text (battery %, bin labels, number field): **Silkscreen**, 1-bit, at native 8px (16px on emery/gabbro).
-- Number field: one pre-rendered bitmap or cached layer, never per-cell text drawing in the frame loop.
-- Only colours from the Pebble 64-colour palette (see spec §2). No alpha.
+- Small text (battery %, bin labels): **Silkscreen**, 1-bit, at native 8px (16px on emery/gabbro).
+- Number field: custom thin 5×7 pixel digits in 14px cells (spec §4.2), blitted into one 1-bit bitmap. Never draw per-cell text in the frame loop.
+- Only colours from the Pebble 64-colour palette (see spec §2). No alpha. Colours come from the user's theme (`src/c/theme.c`), never hard-coded.
 
 ## Implementation guidance
 - Put the layout numbers in a per-platform struct table (`PBL_PLATFORM_*` / `PBL_IF_ROUND_ELSE`). Don't scatter magic numbers.
 - Position glyphs by **cap centre** (spec §3), and use tabular digit slots.
 - Run the animation on a timer (~33 ms). Keep positions in fixed-point and redraw only the dirty layers.
-- Build both layouts A and B. Default to A until settings exist.
-- Verify each platform in the emulator and compare screenshots with `docs/reference/pebble_time_pixels_v3.png` and the prototypes.
+- Build both layouts A ("Standard") and B ("Large"). The user picks one in settings (spec §8). A is the default.
+- Verify each platform in the emulator and compare screenshots with `docs/reference/pebble_time_pixels_v3.png` and the prototypes. `tools/emu_shot.sh` installs the build and screenshots it at 10:09 and 73%. `tools/compare_ref.py` diffs a screenshot against the reference. `MDR_LAYOUT=B` and `MDR_THEME=<n>` set the defaults at build time, for previews.
 
 ## Reference material
 - `docs/reference/*.dc.html`: the interactive design prototypes (HTML + JS). The animation maths in their `renderVals()` is the source of truth for motion.

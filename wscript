@@ -32,6 +32,13 @@ def build(ctx):
     cached_env = ctx.env
     for platform in ctx.env.TARGET_PLATFORMS:
         ctx.env = ctx.all_envs[platform]
+        # Default layout before the user saves settings (for emulator previews):
+        # MDR_LAYOUT=B pebble build
+        if os.environ.get('MDR_LAYOUT', 'A').upper() == 'B':
+            ctx.env.append_unique('DEFINES', 'MDR_LAYOUT_B')
+        # Preview a colour theme (index into src/c/theme.c): MDR_THEME=3 pebble build
+        if os.environ.get('MDR_THEME', '').isdigit():
+            ctx.env.append_unique('DEFINES', 'MDR_THEME=' + os.environ['MDR_THEME'])
         ctx.set_group(ctx.env.PLATFORM_NAME)
         app_elf = '{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
         ctx.pbl_build(source=ctx.path.ant_glob('src/c/**/*.c'), target=app_elf, bin_type='app')

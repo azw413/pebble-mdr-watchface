@@ -12,6 +12,7 @@
   ],
   "private": true,
   "dependencies": {
+    "@rebble/clay": "^1.1.0",
     "pebble-fctx": "^1.6.5"
   },
   "devDependencies": {
@@ -36,7 +37,10 @@
     "watchapp": {
       "watchface": true
     },
-    "messageKeys": [],
+    "messageKeys": [
+      "Layout",
+      "Colour"
+    ],
     "resources": {
       "media": [
         {
@@ -48,19 +52,25 @@
           "type": "font",
           "name": "FONT_SILKSCREEN_8",
           "file": "fonts/Silkscreen-Regular.ttf",
-          "characterRegex": "[0-9A-Z% ]"
+          "characterRegex": "[0-9% ]",
+          "targetPlatforms": [
+            "basalt"
+          ]
         },
         {
           "type": "font",
           "name": "FONT_SILKSCREEN_16",
           "file": "fonts/Silkscreen-Regular.ttf",
-          "characterRegex": "[0-9A-Z% ]",
+          "characterRegex": "[0-9% ]",
           "targetPlatforms": [
             "emery",
             "gabbro"
           ]
         }
       ]
-    }
+    },
+    "capabilities": [
+      "configurable"
+    ]
   }
 }

@@ -33,12 +33,15 @@ Both layouts share: a black background, a dim background **number field**, a bla
 
 The date stays deliberately subdued in Cadet Blue.
 
+This is the default **cyan** theme. Users can pick another base colour in settings (§8); every theme keeps these roles and the same intensity steps (see `src/c/theme.c`).
+
 ## 3. Typography and rendering split
 
 | Use | Font | Rendering |
 |---|---|---|
 | Time digits, date | **Michroma** (Google Fonts, OFL) | **Anti-aliased, sub-pixel positioned** (pebble-fctx) |
-| Battery %, bin labels, number field | **Silkscreen** (Google Fonts, OFL) | **1-bit**, at native 8px, or 16px (exactly 2×) on emery/gabbro |
+| Battery %, bin labels | **Silkscreen** (Google Fonts, OFL) | **1-bit**, at native 8px, or 16px (exactly 2×) on emery/gabbro |
+| Number field | Custom thin **5×7** pixel digits (1px strokes) | **1-bit**, drawn straight into the field bitmap |
 
 Why: when rasterised at true resolution, Michroma is crisp at 17px and up, but turns to mush at 7–8px. Silkscreen is a pixel font designed for 8px. Anti-aliasing is required on the large Michroma digits.
 
@@ -68,11 +71,15 @@ A box with a 1px accent outline and black fill. Inside it, from left to right: t
 | Nub | 2×3 | 2×4 | 2×4 | 2×4 |
 
 ### 4.2 Number field
-A grid of random digits (seeded) in Silkscreen 8px, Midnight Green. **Draw it as one pre-rendered bitmap** (or cached layer), not as hundreds of text calls. The animation needs to brighten it (recolour it, or swap the bitmap's palette to Tiffany Blue) and to hide individual cells.
+A grid of random digits (seeded) in thin 5×7 pixel digits, Midnight Green. **Draw it as one pre-rendered bitmap** (or cached layer), not as hundreds of text calls. The animation needs to brighten it (recolour it, or swap the bitmap's palette to Tiffany Blue) and to hide individual cells.
+
+Changed from the original Silkscreen 8px field (5px caps), which read as too small: Silkscreen is only crisp at 8 and 16px, so the field uses its own 7px-tall digits instead. Each digit is centred in a 14×14 cell. The columns are centred on the screen. Each layout has its own grid y offset, chosen so the field gaps show whole digits rather than ones cut by the header, band, bins or date box.
 
 | | basalt | emery | gabbro |
 |---|---|---|---|
-| Grid | 12 cols × 14 rows, 12×12 cells | 16 × 19, 12.5×12 cells (alternate 12/13 px columns) | 20 × 20, 13×13 cells, clipped to the circle |
+| Grid | 10 cols × 12 rows, x0 2 | 14 × 16, x0 2 | 18 × 18, x0 4, clipped to the circle by the display |
+| Grid y0, A / B | 3 / 3 | 2 / 11 | 4 / 11 |
+| Seed | 7 | 11 | 13 |
 
 ### 4.3 Layout A — MDR
 
@@ -139,5 +146,11 @@ This runs when the minute ticks over to a multiple of 5. It lasts **~2.6 s** at 
 
 ## 7. Not yet designed
 - Bin complications (steps, weather, etc.).
-- Settings: layout A/B choice, 12/24h, colour variants.
+- Settings: 12/24h (currently follows the watch's setting).
+- Low-battery colour per theme, and the dim steps of the blue and amber themes, need checking on a device.
 - Date format. The mock uses an uppercase weekday and day number (`TUE 17`).
+
+## 8. Settings
+A phone settings page (Clay, `@rebble/clay`; `src/pkjs/config.js`) sends the choices to the watch, which saves them with `persist_*`.
+- **Style:** Standard (layout A) or Large (layout B).
+- **Colour:** one of 8 base colours: cyan (default), green, amber, red, magenta, blue, yellow, white. The swatch is the theme's bright (time) colour. The other roles are derived from it with the rule the cyan palette follows (bright = FF/AA, highlight = FF/55, accent = AA/55, field during the animation = AA/00, field at rest = 55/00 for channels on/off). Amber is hand-picked. Red, amber and magenta use yellow for the low-battery fill.
