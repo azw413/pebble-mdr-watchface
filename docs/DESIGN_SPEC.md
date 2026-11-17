@@ -110,7 +110,7 @@ Round 2 check: every element was kept inside the circle's chord at its y positio
 
 ## 5. The 5-minute "refinement" animation
 
-This runs when the minute ticks over to a multiple of 5. The timeline below spans **2.6 s of design time**. The watch plays it **2× slower** (`ANIM_SLOWDOWN`, so **~5.2 s** in real time) at about 30 fps: the same motion over a longer time, because at full speed it was over before you could follow it. Both prototypes in `docs/reference/` are the source of truth for the motion. The values below are for emery (Time 2). The other platforms scale them by time size (A: `time_px / 46`, B: `digit_px / 84`) and, for B's fall, by screen height (`h / 228`).
+This runs when the minute ticks over to a multiple of the user's interval (5 minutes by default, see §8). The timeline below spans **2.6 s of design time**. The watch plays it **2× slower** (`ANIM_SLOWDOWN`, so **~5.2 s** in real time) at about 30 fps: the same motion over a longer time, because at full speed it was over before you could follow it. Both prototypes in `docs/reference/` are the source of truth for the motion. The values below are for emery (Time 2). The other platforms scale them by time size (A: `time_px / 46`, B: `digit_px / 84`) and, for B's fall, by screen height (`h / 228`).
 
 **Engineering rules (learned in prototyping):**
 - **Never change the font's point size frame by frame.** Render each digit as a vector glyph scaled by a transform, with **sub-pixel (fixed-point) positions**. Integer snapping produces visible shimmer. pebble-fctx does this natively.
@@ -155,3 +155,4 @@ This runs when the minute ticks over to a multiple of 5. The timeline below span
 A phone settings page (Clay, `@rebble/clay`; `src/pkjs/config.js`) sends the choices to the watch, which saves them with `persist_*`.
 - **Style:** Standard (layout A) or Large (layout B).
 - **Colour:** one of 8 base colours: cyan (default), green, amber, red, magenta, blue, yellow, white. The swatch is the theme's bright (time) colour. The other roles are derived from it with the rule the cyan palette follows (bright = FF/AA, highlight = FF/55, accent = AA/55, field during the animation = AA/00, field at rest = 55/00 for channels on/off). Amber is hand-picked. Red, amber and magenta use yellow for the low-battery fill.
+- **Animate every:** 1, 5, 10, 15 or 30 minutes, 1 hour, or never. The default is 5 minutes. Runs are aligned to the clock (every 15 minutes means :00, :15, :30 and :45). Each run lasts about 5 s, so short intervals cost battery.

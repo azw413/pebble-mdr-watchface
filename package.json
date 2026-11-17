@@ -39,7 +39,8 @@
     },
     "messageKeys": [
       "Layout",
-      "Colour"
+      "Colour",
+      "Interval"
     ],
     "resources": {
       "media": [

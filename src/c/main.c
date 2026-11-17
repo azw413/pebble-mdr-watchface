@@ -521,8 +521,9 @@ static void tick_handler(struct tm *t, TimeUnits changed) {
   char next[6];
   format_time(t, next);
   update_date(t);
-  // Every 5 minutes the old time is refined into the new one (spec 5).
-  if (t->tm_min % 5 == 0 && strcmp(next, s_time) != 0 && !s_anim.active) {
+  // At the user's interval (5 min by default) the old time is refined into the
+  // new one (spec 5).
+  if (settings_anim_due(&s_settings, t) && strcmp(next, s_time) != 0 && !s_anim.active) {
     anim_start(s_time, next);
     return;
   }

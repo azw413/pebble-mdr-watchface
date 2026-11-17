@@ -38,6 +38,31 @@ module.exports = [
     ]
   },
   {
+    type: 'section',
+    items: [
+      {
+        type: 'heading',
+        defaultValue: 'Refinement'
+      },
+      {
+        type: 'select',
+        messageKey: 'Interval',
+        label: 'Animate every',
+        description: 'How often the old time is refined into the new one. Each run lasts about 5 seconds, so short intervals use more battery.',
+        defaultValue: '5',
+        options: [
+          { label: '1 minute', value: '1' },
+          { label: '5 minutes', value: '5' },
+          { label: '10 minutes', value: '10' },
+          { label: '15 minutes', value: '15' },
+          { label: '30 minutes', value: '30' },
+          { label: '1 hour', value: '60' },
+          { label: 'Never', value: '0' }
+        ]
+      }
+    ]
+  },
+  {
     type: 'submit',
     defaultValue: 'Save'
   }

@@ -2,13 +2,20 @@
 #include "theme.h"
 
 #define PERSIST_KEY_SETTINGS 1
-#define SETTINGS_VERSION 1
+#define SETTINGS_VERSION 2
 
+// Version 1 had only the first three fields; it is migrated on load.
 typedef struct __attribute__((packed)) {
   uint8_t version;
   uint8_t layout;
   uint8_t theme;
+  uint8_t anim_every;   // added in version 2
 } StoredSettings;
+
+// Choices offered by the settings page (src/pkjs/config.js).
+static bool valid_interval(int32_t m) {
+  return m == 0 || m == 1 || m == 5 || m == 10 || m == 15 || m == 30 || m == 60;
+}
 
 // Defaults until the user saves settings. MDR_LAYOUT=B / MDR_THEME=<n> in the
 // build environment change them, for emulator previews (see wscript).
@@ -22,19 +29,22 @@ typedef struct __attribute__((packed)) {
 #endif
 
 Settings settings_load(void) {
-  Settings s = {.layout = DEFAULT_LAYOUT, .theme = MDR_THEME};
-  StoredSettings st;
-  if (persist_exists(PERSIST_KEY_SETTINGS) &&
-      persist_read_data(PERSIST_KEY_SETTINGS, &st, sizeof(st)) == sizeof(st) &&
-      st.version == SETTINGS_VERSION) {
-    s.layout = st.layout == LAYOUT_B ? LAYOUT_B : LAYOUT_A;
-    s.theme = st.theme < THEME_COUNT ? st.theme : THEME_DEFAULT;
+  Settings s = {.layout = DEFAULT_LAYOUT, .theme = MDR_THEME, .anim_every = ANIM_EVERY_DEFAULT};
+  StoredSettings st = {0};
+  if (!persist_exists(PERSIST_KEY_SETTINGS)) return s;
+  const int n = persist_read_data(PERSIST_KEY_SETTINGS, &st, sizeof(st));
+  if (n < 3 || st.version < 1 || st.version > SETTINGS_VERSION) return s;
+  s.layout = st.layout == LAYOUT_B ? LAYOUT_B : LAYOUT_A;
+  s.theme = st.theme < THEME_COUNT ? st.theme : THEME_DEFAULT;
+  if (st.version >= 2 && n >= (int)sizeof(st) && valid_interval(st.anim_every)) {
+    s.anim_every = st.anim_every;
   }
   return s;
 }
 
 void settings_save(const Settings *s) {
-  StoredSettings st = {.version = SETTINGS_VERSION, .layout = s->layout, .theme = s->theme};
+  StoredSettings st = {.version = SETTINGS_VERSION, .layout = s->layout, .theme = s->theme,
+                       .anim_every = s->anim_every};
   persist_write_data(PERSIST_KEY_SETTINGS, &st, sizeof(st));
 }
 
@@ -57,5 +67,14 @@ bool settings_update_from_message(Settings *s, DictionaryIterator *iter) {
   if (t) s->layout = tuple_int(t) == 1 ? LAYOUT_B : LAYOUT_A;
   t = dict_find(iter, MESSAGE_KEY_Colour);
   if (t) s->theme = theme_from_rgb((uint32_t)tuple_int(t));
-  return s->layout != before.layout || s->theme != before.theme;
+  t = dict_find(iter, MESSAGE_KEY_Interval);
+  if (t && valid_interval(tuple_int(t))) s->anim_every = (uint8_t)tuple_int(t);
+  return s->layout != before.layout || s->theme != before.theme ||
+         s->anim_every != before.anim_every;
+}
+
+bool settings_anim_due(const Settings *s, const struct tm *t) {
+  if (s->anim_every == 0) return false;
+  // Aligned to the clock: every 15 min means :00, :15, :30 and :45.
+  return (t->tm_hour * 60 + t->tm_min) % s->anim_every == 0;
 }
