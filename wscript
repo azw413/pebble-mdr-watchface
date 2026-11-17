@@ -45,6 +45,9 @@ def build(ctx):
             ctx.env.append_unique('DEFINES', 'MDR_FREEZE=' + os.environ['MDR_FREEZE'])
         if os.environ.get('MDR_DEMO'):
             ctx.env.append_unique('DEFINES', 'MDR_DEMO')
+        # Store GIF capture: MDR_CAPTURE=<design ms per tap> (tools/store_assets.py)
+        if os.environ.get('MDR_CAPTURE', '').isdigit():
+            ctx.env.append_unique('DEFINES', 'MDR_CAPTURE=' + os.environ['MDR_CAPTURE'])
         ctx.set_group(ctx.env.PLATFORM_NAME)
         app_elf = '{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
         ctx.pbl_build(source=ctx.path.ant_glob('src/c/**/*.c'), target=app_elf, bin_type='app')

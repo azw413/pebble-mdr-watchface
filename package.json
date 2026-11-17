@@ -1,7 +1,7 @@
 {
-  "name": "mdr-watchface",
-  "author": "andrew",
-  "version": "0.1.0",
+  "name": "refinement",
+  "author": "Andrew Whaley",
+  "version": "1.0.0",
   "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
@@ -25,7 +25,7 @@
     "fonts": "python3 tools/build_fonts.py"
   },
   "pebble": {
-    "displayName": "MDR",
+    "displayName": "Refinement",
     "uuid": "3e7acad2-a7b4-43c9-aaf4-1c3ee9718875",
     "sdkVersion": "3",
     "enableMultiJS": true,

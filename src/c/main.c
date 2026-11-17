@@ -10,6 +10,12 @@
 #include "settings.h"
 #include "theme.h"
 
+// Capture builds (MDR_CAPTURE=<design ms>, see wscript and tools/store_assets.py)
+// hold the fixed preview run from t = 0 and step it forward on each tap.
+#if defined(MDR_CAPTURE) && !defined(MDR_FREEZE)
+#define MDR_FREEZE 0
+#endif
+
 // Palette roles (spec section 2), taken from the user's colour theme.
 static Theme s_theme;
 #define COL_TIME   (s_theme.bright)
@@ -554,6 +560,22 @@ static void tap_handler(AccelAxisType axis, int32_t direction) {
 }
 #endif
 
+#ifdef MDR_CAPTURE
+// Capture builds: each tap (`pebble emu-tap`) advances the held run by one step,
+// so a script can screenshot every frame. The last step finishes the run.
+static void capture_tap_handler(AccelAxisType axis, int32_t direction) {
+  if (!s_anim.active) return;
+  s_anim.t += MDR_CAPTURE;
+  if (s_anim.t >= ANIM_DURATION_MS) {
+    anim_finish();
+    return;
+  }
+  anim_frame(&s_anim, &s_frame);
+  anim_apply_cells();
+  mark_all_dirty();
+}
+#endif
+
 // ---------------------------------------------------------------------------
 // Settings
 
@@ -636,6 +658,9 @@ static void init(void) {
 #ifdef MDR_DEMO
   accel_tap_service_subscribe(tap_handler);
 #endif
+#ifdef MDR_CAPTURE
+  accel_tap_service_subscribe(capture_tap_handler);
+#endif
 #ifdef MDR_FREEZE
   srand(1);  // the same run every time, so frames can be compared
   anim_start("10:10", "10:15");  // as in the prototypes
@@ -643,7 +668,7 @@ static void init(void) {
 }
 
 static void deinit(void) {
-#ifdef MDR_DEMO
+#if defined(MDR_DEMO) || defined(MDR_CAPTURE)
   accel_tap_service_unsubscribe();
 #endif
   anim_cancel();

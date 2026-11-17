@@ -4,7 +4,7 @@
 module.exports = [
   {
     type: 'heading',
-    defaultValue: 'MDR'
+    defaultValue: 'Refinement'
   },
   {
     type: 'section',

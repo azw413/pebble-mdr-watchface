@@ -1,6 +1,6 @@
 # MDR Watchface — project notes for Claude Code
 
-A Pebble watchface inspired by the *Severance* MDR screens. **Read `docs/DESIGN_SPEC.md` before writing code.** It has the geometry, colours, fonts and animation timings for each platform.
+A Pebble watchface inspired by the *Severance* MDR screens, published as **Refinement** (by Andrew Whaley). **Read `docs/DESIGN_SPEC.md` before writing code.** It has the geometry, colours, fonts and animation timings for each platform.
 
 ## Targets
 - `basalt` (Pebble Time, 144×168), `emery` (Pebble Time 2, 200×228), `gabbro` (Pebble Round 2, 260×260 round).
@@ -21,6 +21,7 @@ A Pebble watchface inspired by the *Severance* MDR screens. **Read `docs/DESIGN_
 
 ## Reference material
 - `docs/reference/*.dc.html`: the interactive design prototypes (HTML + JS). The animation maths in their `renderVals()` is the source of truth for motion.
+- `store/<platform>/`: app-store screenshots (`standard.png`, `large.png`) and the Standard animation (`standard-refinement.gif`) at native resolution, in true palette colours. Regenerate them after visual changes with `python3 tools/store_assets.py screenshots` and `python3 tools/store_assets.py gif`, which use an `MDR_CAPTURE` build that steps the animation one frame per emulator tap. Run a plain `pebble build` afterwards. `tools/store_art.py` makes the banner and icons. `store/README.md` is the listing sheet (text, release notes, which file goes in which store slot).
 - `tools/render_preview.py`: rasterises the basalt layouts at true pixels in the 64-colour palette (needs Pillow and the two TTFs).
 - Fonts (OFL): Michroma `https://raw.githubusercontent.com/google/fonts/main/ofl/michroma/Michroma-Regular.ttf`, Silkscreen `https://raw.githubusercontent.com/google/fonts/main/ofl/silkscreen/Silkscreen-Regular.ttf`. Include their OFL licence files with the resources.
 - Don't use the Lumon logo or any other show branding. Keep the style "inspired by".
