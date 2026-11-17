@@ -33,6 +33,8 @@ typedef struct {
   int16_t time_cy;            // time cap centre y, PX16
   uint8_t date_px;
   int16_t date_cy;            // PX16
+  uint8_t date_box_pad;       // black box behind the date (shows when the band folds):
+  uint8_t date_box_v;         //   horizontal padding, and vertical padding past the caps
   GRect bins;                 // area covering all four bins
   uint8_t bin_gap;
   int8_t bin_label_cap_top;   // label cap top, relative to bin top

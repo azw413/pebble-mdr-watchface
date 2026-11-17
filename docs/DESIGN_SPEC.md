@@ -110,7 +110,7 @@ Round 2 check: every element was kept inside the circle's chord at its y positio
 
 ## 5. The 5-minute "refinement" animation
 
-This runs when the minute ticks over to a multiple of 5. It lasts **~2.6 s** at about 30 fps. Both prototypes in `docs/reference/` are the source of truth for the motion. The values below are for emery (Time 2); scale them per platform.
+This runs when the minute ticks over to a multiple of 5. The timeline below spans **2.6 s of design time**. The watch plays it **2× slower** (`ANIM_SLOWDOWN`, so **~5.2 s** in real time) at about 30 fps: the same motion over a longer time, because at full speed it was over before you could follow it. Both prototypes in `docs/reference/` are the source of truth for the motion. The values below are for emery (Time 2). The other platforms scale them by time size (A: `time_px / 46`, B: `digit_px / 84`) and, for B's fall, by screen height (`h / 228`).
 
 **Engineering rules (learned in prototyping):**
 - **Never change the font's point size frame by frame.** Render each digit as a vector glyph scaled by a transform, with **sub-pixel (fixed-point) positions**. Integer snapping produces visible shimmer. pebble-fctx does this natively.
@@ -124,14 +124,15 @@ This runs when the minute ticks over to a multiple of 5. It lasts **~2.6 s** at 
 2. **Bin, from 600.** A random bin i opens its lid: two 1px flaps hinged at the outer corners, rotating to ±110° with `a = ease((t−600)/250) − ease((t−1750)/250)`.
    Old char j starts at 700 + 70·j and takes 800 ms (eased). It follows a quadratic Bézier from its slot, via a control point (midpoint x, CY − 36), to (binCentreX + 3·(j−2), y = 208), shrinking to 9px. The bins are drawn above the digits, so a digit disappears as it enters the bin's mouth.
    The bin outline flashes Celeste during 1500–2000. Its fill bar gains +6% at 1600.
-3. **Refine, from 700.** Pick 4 random field cells (not adjacent to each other, rows 2–13) and set them to the new digits. At 700 they are hidden in the field and replaced by floating Michroma glyphs in Electric Blue.
+3. **Refine, from 700.** Pick 4 random field cells (not adjacent to each other; on the watch, any cell that is fully visible once the band folds: not under the header, bins or date box, not in the edge columns, and inside the circle on round) and set them to the new digits. At 700 they are hidden in the field and replaced by floating Michroma glyphs in Electric Blue.
    New digit k pulses in place (8 → 13 → 8px) until 900 + 90·k. It then eases over 1100 ms to its slot while growing from 8px to FS, and turns Celeste when it arrives.
 4. **Settle.** The colon reappears at 2000. The band unfolds over 1900–2400. The animation ends at 2600, and the field reverts to its rest digits.
 
 ### 5.2 Layout B timeline (differences from A)
 - Agitate swell is 0.12 instead of 0.16, and the bob is 4px.
 - **Drop:** old digits leave in a random order, each starting at 700 + 110·rank. With u = (t − start)/900 (linear time, which gives natural gravity): x = slotX + drift·u, where drift is random in ±16; y = slotY − 26·u + 300·u². A digit is hidden once it is fully below the screen. The date box is drawn above the falling digits.
-- New digits are as in A, flying to the four stacked slots (cells come from rows 3–14). No colon.
+- New digits are as in A, flying to the four stacked slots. No colon.
+- **Watch change:** each row swells from the edge next to the gap between the rows (hours grow upward, minutes downward) and bobs only away from that gap. With the prototype's symmetric swell and bob, the stacked zeros touched and "10 / 10" briefly read as "18 / 18".
 - Open question: old and new digits cross mid-screen. Consider delaying the emergence if it reads as too busy.
 
 ### 5.3 Open animation questions

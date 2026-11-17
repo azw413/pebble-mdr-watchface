@@ -9,3 +9,9 @@ void field_init(GSize screen, int16_t y0);
 void field_deinit(void);
 void field_draw(GContext *ctx, GRect bounds);
 void field_set_color(GColor c);
+
+// Per-cell control for the refinement animation (spec 5.1 step 3).
+// digit -1 blanks the cell.
+void field_set_cell(int c, int r, int digit);
+void field_restore_cell(int c, int r);  // back to the seeded digit
+GRect field_glyph_rect(int c, int r);   // where the cell's 5x7 digit sits

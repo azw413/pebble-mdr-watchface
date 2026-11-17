@@ -39,6 +39,12 @@ def build(ctx):
         # Preview a colour theme (index into src/c/theme.c): MDR_THEME=3 pebble build
         if os.environ.get('MDR_THEME', '').isdigit():
             ctx.env.append_unique('DEFINES', 'MDR_THEME=' + os.environ['MDR_THEME'])
+        # Animation previews: MDR_FREEZE=<ms> holds one frame of a fixed run;
+        # MDR_DEMO=1 plays the animation on a tap (pebble emu-tap).
+        if os.environ.get('MDR_FREEZE', '').isdigit():
+            ctx.env.append_unique('DEFINES', 'MDR_FREEZE=' + os.environ['MDR_FREEZE'])
+        if os.environ.get('MDR_DEMO'):
+            ctx.env.append_unique('DEFINES', 'MDR_DEMO')
         ctx.set_group(ctx.env.PLATFORM_NAME)
         app_elf = '{}/pebble-app.elf'.format(ctx.env.BUILD_DIR)
         ctx.pbl_build(source=ctx.path.ant_glob('src/c/**/*.c'), target=app_elf, bin_type='app')

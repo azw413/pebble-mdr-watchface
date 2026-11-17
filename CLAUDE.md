@@ -17,7 +17,7 @@ A Pebble watchface inspired by the *Severance* MDR screens. **Read `docs/DESIGN_
 - Position glyphs by **cap centre** (spec §3), and use tabular digit slots.
 - Run the animation on a timer (~33 ms). Keep positions in fixed-point and redraw only the dirty layers.
 - Build both layouts A ("Standard") and B ("Large"). The user picks one in settings (spec §8). A is the default.
-- Verify each platform in the emulator and compare screenshots with `docs/reference/pebble_time_pixels_v3.png` and the prototypes. `tools/emu_shot.sh` installs the build and screenshots it at 10:09 and 73%. `tools/compare_ref.py` diffs a screenshot against the reference. `MDR_LAYOUT=B` and `MDR_THEME=<n>` set the defaults at build time, for previews.
+- Verify each platform in the emulator and compare screenshots with `docs/reference/pebble_time_pixels_v3.png` and the prototypes. `tools/emu_shot.sh` installs the build and screenshots it at 10:09 and 73%. `tools/compare_ref.py` diffs a screenshot against the reference. `MDR_LAYOUT=B` and `MDR_THEME=<n>` set the defaults at build time, for previews. For the animation, `MDR_FREEZE=<design ms>` holds one frame of a fixed run (10:10 to 10:15), and `MDR_DEMO=1` plays it on a tap (`pebble emu-tap`) and logs the frame count.
 
 ## Reference material
 - `docs/reference/*.dc.html`: the interactive design prototypes (HTML + JS). The animation maths in their `renderVals()` is the source of truth for motion.

@@ -79,6 +79,26 @@ void field_set_color(GColor c) {
   if (s_palette) s_palette[1] = c;
 }
 
+static bool in_grid(int c, int r) {
+  return s_bitmap && c >= 0 && r >= 0 && c < LAYOUT.field.cols && r < LAYOUT.field.rows;
+}
+
+void field_set_cell(int c, int r, int digit) {
+  if (!in_grid(c, r)) return;
+  blit_cell(c, r, 0, false);
+  if (digit >= 0 && digit <= 9) blit_cell(c, r, digit, true);
+}
+
+void field_restore_cell(int c, int r) {
+  if (in_grid(c, r)) field_set_cell(c, r, s_digits[r * LAYOUT.field.cols + c]);
+}
+
+GRect field_glyph_rect(int c, int r) {
+  const FieldLayout *f = &LAYOUT.field;
+  return GRect(f->x0 + c * f->cell_w + (f->cell_w - GLYPH_W) / 2,
+               s_y0 + r * f->cell_h + (f->cell_h - GLYPH_H) / 2, GLYPH_W, GLYPH_H);
+}
+
 void field_draw(GContext *ctx, GRect bounds) {
   if (!s_bitmap) return;
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
