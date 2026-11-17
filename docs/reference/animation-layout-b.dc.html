@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MDR watchface — 5-minute refinement, large display</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Michroma&amp;family=Silkscreen&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#55AAAA}a:hover{color:#AAFFFF}
+</style>
+</helmet>
+<div style="width: 840px; height: 640px; box-sizing: border-box; padding: 40px; background: #0d1114; display: flex; flex-direction: column; gap: 28px; font-family: 'Michroma', sans-serif; color: #c9d6db">
+<div style="font-size: 14px; letter-spacing: 1px">5-MINUTE REFINEMENT · PEBBLE TIME 2 · LAYOUT B · 2×</div>
+<div style="display: flex; gap: 48px; align-items: flex-start">
+
+<div style="width: 400px; height: 456px; position: relative; flex-shrink: 0; outline: 1px solid #2a3238; outline-offset: 6px; border-radius: 2px">
+<div style="position: absolute; left: 0; top: 0; width: 200px; height: 228px; transform: scale(2); transform-origin: 0 0; background: #000000; overflow: hidden">
+<div style="position: absolute; left: 0; top: 0; width: 200px; height: 228px; z-index: 0; display: grid; grid-template-columns: repeat(16, 12.5px); grid-auto-rows: 12px; font-family: 'Silkscreen', monospace; font-size: 8px; line-height: 12px; text-align: center; color: {{gridColor}}">
+<sc-for list="{{cells}}" as="c" hint-placeholder-count="304"><span style="opacity: {{c.o}}">{{c.d}}</span></sc-for>
+</div>
+<sc-if value="{{bandShow}}" hint-placeholder-val="{{ true }}">
+<div style="position: absolute; left: 0; right: 0; top: {{bandTop}}; height: {{bandH}}; z-index: 1; box-sizing: border-box; background: #000000; border-top: 1px solid {{accent}}; border-bottom: 1px solid {{accent}}"></div>
+</sc-if>
+<sc-for list="{{oldChars}}" as="ch" hint-placeholder-count="4">
+<div style="position: absolute; left: 0; top: 0; z-index: 2; font-size: 84px; line-height: 84px; color: {{ch.color}}; display: {{ch.disp}}; transform: {{ch.tf}}; will-change: transform; white-space: nowrap">{{ch.s}}</div>
+</sc-for>
+<sc-for list="{{newChars}}" as="ch" hint-placeholder-count="0">
+<div style="position: absolute; left: 0; top: 0; z-index: 2; font-size: 84px; line-height: 84px; color: {{ch.color}}; display: {{ch.disp}}; transform: {{ch.tf}}; will-change: transform; white-space: nowrap">{{ch.s}}</div>
+</sc-for>
+<div style="position: absolute; left: 0; right: 0; top: 194px; z-index: 3; display: flex; justify-content: center"><span style="background: #000000; padding: 0 6px; font-size: 22px; line-height: 28px; white-space: nowrap; color: {{dateColor}}">TUE 17</span></div>
+<div style="position: absolute; left: 7px; right: 7px; top: 7px; height: 20px; z-index: 3; box-sizing: border-box; border: 1px solid {{accent}}; background: #000000; display: flex; align-items: center; gap: 6px; padding: 0 6px; font-size: 16px; color: {{timeColor}}"><span style="white-space: nowrap; font-family: 'Silkscreen', monospace; line-height: 16px; min-width: 48px; position: relative; top: -1px">73%</span><div style="flex: 1; height: 10px; box-sizing: border-box; border: 1px solid {{accent}}; padding: 1px"><div style="width: 73%; height: 6px; background: {{accent}}"></div></div><div style="width: 2px; height: 4px; background: {{accent}}"></div></div>
+</div>
+</div>
+
+<div style="flex: 1; display: flex; flex-direction: column; gap: 20px; font-family: 'Silkscreen', monospace; font-size: 13px; line-height: 20px; color: #9fb3ba">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<button type="button" onClick="{{play}}" disabled="{{busy}}" style="font-family: 'Michroma', sans-serif; font-size: 13px; letter-spacing: 1px; min-height: 44px; padding: 0 16px; background: #0b2a2e; color: #AAFFFF; border: 1px solid #55AAAA; border-radius: 2px; cursor: pointer">{{playLabel}}</button>
+<button type="button" onClick="{{toggleSlow}}" aria-pressed="{{slowPressed}}" style="font-family: 'Michroma', sans-serif; font-size: 12px; letter-spacing: 1px; min-height: 44px; padding: 0 16px; background: transparent; color: #c9d6db; border: 1px solid #2a3238; border-radius: 2px; cursor: pointer">{{slowLabel}}</button>
+</div>
+<div style="color: #c9d6db; font-family: 'Michroma', sans-serif; font-size: 12px; letter-spacing: 1px">SEQUENCE · ~2.6 S</div>
+<div><span style="color: #AAFFFF">0.0 AGITATE</span><br>The big digits swell and bob out of step. The band folds shut and the number field brightens.</div>
+<div><span style="color: #AAFFFF">0.7 DROP</span><br>No bins here: each old digit hops up and tips off the bottom of the screen under gravity, drifting slightly sideways, one after another.</div>
+<div><span style="color: #AAFFFF">0.9 REFINE</span><br>Four numbers in the field (the new digits) pulse, then grow into the stacked hour and minute slots.</div>
+<div><span style="color: #AAFFFF">1.9–2.6 SETTLE</span><br>The band unfolds behind the new time.</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"timeColor":{"editor":"color","default":"#AAFFFF","options":["#AAFFFF","#55FFFF","#FFFFFF","#FFFFAA"]},"dateColor":{"editor":"color","default":"#55AAAA","options":["#55AAAA","#00AAAA","#5555AA","#AAAAAA"]},"accent":{"editor":"color","default":"#55AAAA","options":["#55AAAA","#00AAAA","#AAFFFF","#0055AA"]},"$preview":{"width":840,"height":640}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { time: '10:10', to: null, t: null, src: [], drift: [], slow: false };
+    this.raf = null;
+    var seed = 11, base = [];
+    for (var i = 0; i < 304; i++) { seed = (seed * 16807) % 2147483647; base.push(String(seed % 10)); }
+    this.base = base;
+  }
+  componentWillUnmount() {
+    if (this.raf) cancelAnimationFrame(this.raf);
+  }
+  addFive(s) {
+    var h = parseInt(s.slice(0, 2), 10), m = parseInt(s.slice(3, 5), 10) + 5;
+    if (m >= 60) { m -= 60; h = (h + 1) % 24; }
+    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+  }
+  play() {
+    if (this.state.t !== null) return;
+    var self = this;
+    var to = this.addFive(this.state.time);
+    var src = [], used = {}, drift = [];
+    for (var i = 0; i < 4; i++) {
+      var r, c, k, n = 0;
+      do { r = 3 + Math.floor(Math.random() * 12); c = 1 + Math.floor(Math.random() * 14); k = r * 16 + c; n++; }
+      while ((used[k] || used[k - 1] || used[k + 1] || used[k - 16] || used[k + 16]) && n < 50);
+      used[k] = 1; src.push({ r: r, c: c });
+      drift.push((Math.random() * 2 - 1) * 16);
+    }
+    var order = [0, 1, 2, 3].sort(function () { return Math.random() - 0.5; });
+    this.setState({ to: to, src: src, drift: drift, order: order, t: 0 });
+    var last = performance.now(), t = 0;
+    var step = function (now) {
+      t += (now - last) * (self.state.slow ? 0.3 : 1); last = now;
+      if (t >= 2600) { self.setState({ time: to, to: null, t: null }); self.raf = null; return; }
+      self.setState({ t: t });
+      self.raf = requestAnimationFrame(step);
+    };
+    this.raf = requestAnimationFrame(step);
+  }
+  renderVals() {
+    var self = this, s = this.state, p = this.props, t = s.t;
+    var timeColor = p.timeColor ?? '#AAFFFF', dateColor = p.dateColor ?? '#55AAAA', accent = p.accent ?? '#55AAAA';
+    var FS = 84, ADV = 0.951 * FS, x0 = (200 - 2 * ADV) / 2;
+    var slots = [{ x: x0 + ADV / 2, y: 74.5 }, { x: x0 + ADV * 1.5, y: 74.5 }, { x: x0 + ADV / 2, y: 149.5 }, { x: x0 + ADV * 1.5, y: 149.5 }];
+    var clamp = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+    var ease = function (v) { v = clamp(v); return v < 0.5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2, 3) / 2; };
+    var ch = function (str, x, y, fs, color, show) {
+      var tf = 'translate3d(' + x.toFixed(3) + 'px,' + (y - 0.07 * fs).toFixed(3) + 'px,0) translate(-50%,-50%) scale(' + (fs / FS).toFixed(4) + ')';
+      return { s: str, tf: tf, color: color, disp: show ? 'block' : 'none' };
+    };
+    var cur = s.time, digits = [cur[0], cur[1], cur[3], cur[4]], oldChars = [], newChars = [];
+    if (t === null) {
+      for (var i = 0; i < 4; i++) oldChars.push(ch(digits[i], slots[i].x, slots[i].y, FS, timeColor, true));
+    } else {
+      var nd = [s.to[0], s.to[1], s.to[3], s.to[4]];
+      for (var j = 0; j < 4; j++) {
+        var ph = j * 1.3, st = 700 + s.order[j] * 110, x, y, fs, show = true;
+        if (t < st) {
+          var bump = Math.sin(Math.PI * clamp(t / 700)), wob = 0.75 + 0.25 * Math.sin(t / 70 + ph);
+          fs = FS * (1 + 0.12 * bump * wob); x = slots[j].x; y = slots[j].y + 4 * bump * Math.sin(t / 55 + ph);
+        } else {
+          var u = (t - st) / 900;
+          x = slots[j].x + s.drift[j] * u; y = slots[j].y - 26 * u + 300 * u * u; fs = FS;
+          show = y - FS * 0.4 < 228;
+        }
+        oldChars.push(ch(digits[j], x, y, fs, timeColor, show));
+      }
+      for (var k = 0; k < 4; k++) {
+        var c = s.src[k], sx2 = c.c * 12.5 + 6.25, sy2 = c.r * 12 + 6;
+        var st2 = 900 + k * 90, pr2 = clamp((t - st2) / 1100), e2 = ease(pr2), x2, y2, fs2;
+        if (t < 700) { newChars.push(ch(nd[k], sx2, sy2, 8, '#55FFFF', false)); continue; }
+        if (t < st2) { var q = clamp((t - 700) / (st2 - 700)); fs2 = 8 + 5 * Math.sin(Math.PI * q); x2 = sx2; y2 = sy2; }
+        else { x2 = sx2 + (slots[k].x - sx2) * e2; y2 = sy2 + (slots[k].y - sy2) * e2; fs2 = 8 + (FS - 8) * e2; }
+        newChars.push(ch(nd[k], x2, y2, fs2, pr2 >= 1 ? timeColor : '#55FFFF', true));
+      }
+    }
+    var cellKey = t === null ? 'idle' : s.src.map(function (c) { return c.r * 16 + c.c; }).join(',') + '|' + s.to + '|' + (t >= 700);
+    if (this.cellKey !== cellKey) {
+      var override = {};
+      if (t !== null) { var nd2 = [s.to[0], s.to[1], s.to[3], s.to[4]]; for (var m = 0; m < 4; m++) override[s.src[m].r * 16 + s.src[m].c] = nd2[m]; }
+      this.cellCache = this.base.map(function (d, n) {
+        var o = override[n];
+        return { d: o !== undefined ? o : d, o: (o !== undefined && t >= 700) ? 0 : 1 };
+      });
+      this.cellKey = cellKey;
+    }
+    var open = t === null ? 1 : (t < 1900 ? 1 - ease((t - 250) / 450) : ease((t - 1900) / 500));
+    return {
+      timeColor: timeColor, dateColor: dateColor, accent: accent,
+      gridColor: (t !== null && t > 600 && t < 2100) ? '#00AAAA' : '#005555',
+      cells: this.cellCache, oldChars: oldChars, newChars: newChars,
+      bandShow: open > 0.01, bandTop: (112 - 76 * open).toFixed(2) + 'px', bandH: (152 * open).toFixed(2) + 'px',
+      busy: t !== null,
+      playLabel: t !== null ? 'REFINING…' : 'PLAY  ' + cur + ' → ' + this.addFive(cur),
+      play: function () { self.play(); },
+      toggleSlow: function () { self.setState({ slow: !self.state.slow }); },
+      slowPressed: s.slow ? 'true' : 'false',
+      slowLabel: s.slow ? 'SLOW MOTION: ON' : 'SLOW MOTION: OFF'
+    };
+  }
+}
+</script>
+</body>
+</html>

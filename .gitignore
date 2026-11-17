@@ -1,0 +1,22 @@
+# Pebble SDK build output
+build/
+.lock-waf*
+wscript.pyc
+
+# npm dependencies (restored by `npm install` / `pebble build`)
+node_modules/
+
+# Python
+__pycache__/
+*.pyc
+
+# Emulator / screenshot scratch
+*.pbw
+screenshots/
+
+# Editors and OS
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store

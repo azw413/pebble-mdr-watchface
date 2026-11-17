@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MDR watchface — Pebble Round 2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Michroma&amp;family=Silkscreen&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#55AAAA}a:hover{color:#AAFFFF}
+</style>
+</helmet>
+<div style="width: 1184px; height: 700px; box-sizing: border-box; padding: 40px; background: #0d1114; display: flex; flex-direction: column; gap: 28px; font-family: 'Michroma', sans-serif; color: #c9d6db">
+<div style="font-size: 14px; letter-spacing: 1px">PEBBLE ROUND 2 · 260 × 260 · SHOWN AT 2×</div>
+<div style="display: flex; gap: 64px">
+
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="width: 520px; height: 520px; position: relative; outline: 1px solid #2a3238; outline-offset: 6px; border-radius: 50%">
+<div style="position: absolute; left: 0; top: 0; width: 260px; height: 260px; transform: scale(2); transform-origin: 0 0; background: #000000; overflow: hidden; border-radius: 50%">
+<sc-if value="{{showGrid}}" hint-placeholder-val="{{ true }}">
+<div style="position: absolute; left: 0; top: 0; width: 260px; height: 260px; display: grid; grid-template-columns: repeat(20, 13px); grid-auto-rows: 13px; font-family: 'Silkscreen', monospace; font-size: 8px; line-height: 13px; text-align: center; color: #005555">
+<sc-for list="{{cells}}" as="c" hint-placeholder-count="400"><span>{{c.d}}</span></sc-for>
+</div>
+</sc-if>
+<div style="position: absolute; left: 65px; right: 65px; top: 30px; height: 20px; box-sizing: border-box; border: 1px solid {{accent}}; background: #000000; display: flex; align-items: center; gap: 6px; padding: 0 6px; font-size: 16px; color: {{timeColor}}"><span style="white-space: nowrap; font-family: 'Silkscreen', monospace; line-height: 16px; min-width: 48px; position: relative; top: -1px">{{batt}}%</span><div style="flex: 1; height: 10px; box-sizing: border-box; border: 1px solid {{accent}}; padding: 1px"><div style="width: {{battW}}; height: 6px; background: {{battColor}}"></div></div><div style="width: 2px; height: 4px; background: {{accent}}"></div></div>
+<div style="position: absolute; left: 0; right: 0; top: 88px; height: 96px; box-sizing: border-box; background: #000000; border-top: 1px solid {{accent}}; border-bottom: 1px solid {{accent}}"></div>
+<div style="position: absolute; left: 0; right: 0; top: 94px; height: 58px; line-height: 58px; text-align: center; white-space: nowrap; font-size: 58px; color: {{timeColor}}">{{time}}</div>
+<div style="position: absolute; left: 0; right: 0; top: 148px; height: 32px; line-height: 32px; text-align: center; white-space: nowrap; font-size: 26px; color: {{dateColor}}">{{date}}</div>
+<div style="position: absolute; left: 52px; right: 52px; top: 196px; height: 30px; display: flex; gap: 6px">
+<sc-for list="{{bins}}" as="b" hint-placeholder-count="4">
+<div style="flex: 1; box-sizing: border-box; border: 1px solid {{accent}}; background: #000000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
+<span style="font-family: 'Silkscreen', monospace; font-size: 16px; line-height: 16px; color: {{timeColor}}">{{b.label}}</span>
+<div style="width: 24px; height: 4px; background: #005555"><div style="width: {{b.fillW}}; height: 4px; background: {{accent}}"></div></div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+<div style="font-size: 11px; letter-spacing: 1px; color: #7f9299">A · SINGLE LINE + BINS</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div style="width: 520px; height: 520px; position: relative; outline: 1px solid #2a3238; outline-offset: 6px; border-radius: 50%">
+<div style="position: absolute; left: 0; top: 0; width: 260px; height: 260px; transform: scale(2); transform-origin: 0 0; background: #000000; overflow: hidden; border-radius: 50%">
+<sc-if value="{{showGrid}}" hint-placeholder-val="{{ true }}">
+<div style="position: absolute; left: 0; top: 0; width: 260px; height: 260px; display: grid; grid-template-columns: repeat(20, 13px); grid-auto-rows: 13px; font-family: 'Silkscreen', monospace; font-size: 8px; line-height: 13px; text-align: center; color: #005555">
+<sc-for list="{{cells}}" as="c" hint-placeholder-count="400"><span>{{c.d}}</span></sc-for>
+</div>
+</sc-if>
+<div style="position: absolute; left: 75px; right: 75px; top: 24px; height: 18px; box-sizing: border-box; border: 1px solid {{accent}}; background: #000000; display: flex; align-items: center; gap: 5px; padding: 0 5px; font-size: 16px; color: {{timeColor}}"><span style="white-space: nowrap; font-family: 'Silkscreen', monospace; line-height: 16px; min-width: 48px; position: relative; top: -1px">{{batt}}%</span><div style="flex: 1; height: 9px; box-sizing: border-box; border: 1px solid {{accent}}; padding: 1px"><div style="width: {{battW}}; height: 5px; background: {{battColor}}"></div></div><div style="width: 2px; height: 4px; background: {{accent}}"></div></div>
+<div style="position: absolute; left: 0; right: 0; top: 50px; height: 156px; box-sizing: border-box; background: #000000; border-top: 1px solid {{accent}}; border-bottom: 1px solid {{accent}}"></div>
+<div style="position: absolute; left: 0; right: 0; top: 50px; height: 72px; line-height: 72px; text-align: center; white-space: nowrap; font-size: 80px; color: {{timeColor}}">{{hours}}</div>
+<div style="position: absolute; left: 0; right: 0; top: 122px; height: 72px; line-height: 72px; text-align: center; white-space: nowrap; font-size: 80px; color: {{timeColor}}">{{minutes}}</div>
+<div style="position: absolute; left: 0; right: 0; top: 210px; display: flex; justify-content: center"><span style="background: #000000; padding: 0 6px; font-size: 20px; line-height: 24px; white-space: nowrap; color: {{dateColor}}">{{date}}</span></div>
+</div>
+</div>
+<div style="font-size: 11px; letter-spacing: 1px; color: #7f9299">B · STACKED HOURS / MINUTES</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"time":{"editor":"text","default":"10:09","section":"Test values"},"date":{"editor":"text","default":"TUE 17","section":"Test values"},"timeColor":{"editor":"color","default":"#AAFFFF","options":["#AAFFFF","#55FFFF","#FFFFFF","#FFFFAA"],"section":"Pebble palette"},"dateColor":{"editor":"color","default":"#55AAAA","options":["#55AAAA","#00AAAA","#5555AA","#AAAAAA"],"section":"Pebble palette"},"accent":{"editor":"color","default":"#55AAAA","options":["#55AAAA","#00AAAA","#AAFFFF","#0055AA"],"section":"Pebble palette"},"battery":{"editor":"range","default":73,"min":0,"max":100,"step":1,"unit":"%","section":"Test values"},"lowColor":{"editor":"color","default":"#FF5555","options":["#FF5555","#FF0055","#FFAA00","#FF5500"],"section":"Pebble palette"},"showGrid":{"editor":"boolean","default":true,"section":"Motifs"},"$preview":{"width":1184,"height":700}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var p = this.props;
+    var time = p.time ?? '10:09';
+    var parts = String(time).split(':');
+    var seed = 13;
+    var cells = [];
+    for (var i = 0; i < 400; i++) {
+      seed = (seed * 16807) % 2147483647;
+      cells.push({ d: String(seed % 10) });
+    }
+    var batt = Math.max(0, Math.min(100, Math.round(p.battery ?? 73)));
+    var fills = [62, 35, 88, 14];
+    var bins = fills.map(function (f, i) {
+      return { label: '0' + (i + 1), fillW: Math.round(24 * f / 100) + 'px' };
+    });
+    return {
+      time: time,
+      hours: parts[0] || '',
+      minutes: parts[1] || '',
+      date: p.date ?? 'TUE 17',
+      timeColor: p.timeColor ?? '#AAFFFF',
+      dateColor: p.dateColor ?? '#55AAAA',
+      accent: p.accent ?? '#55AAAA',
+      showGrid: p.showGrid ?? true,
+      cells: cells,
+      bins: bins,
+      batt: batt,
+      battW: batt + '%',
+      battColor: batt <= 20 ? (p.lowColor ?? '#FF5555') : (p.accent ?? '#55AAAA')
+    };
+  }
+}
+</script>
+</body>
+</html>
