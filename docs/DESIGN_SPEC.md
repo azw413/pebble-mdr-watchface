@@ -43,6 +43,8 @@ This is the default **cyan** theme. Users can pick another base colour in settin
 | Battery %, bin labels | **Silkscreen** (Google Fonts, OFL) | **1-bit**, at native 8px, or 16px (exactly 2×) on emery/gabbro |
 | Number field | Custom thin **5×7** pixel digits (1px strokes) | **1-bit**, drawn straight into the field bitmap |
 
+Weight: Michroma has only a Regular weight. On the watch it is **synthetically emboldened by 144 font units** (about 80% thicker strokes) at build time, for legibility (`tools/build_fonts.py --embolden`, FreeType's FT_Outline_Embolden algorithm). The advances, tabular slots and cap-centre positions are unchanged.
+
 Why: when rasterised at true resolution, Michroma is crisp at 17px and up, but turns to mush at 7–8px. Silkscreen is a pixel font designed for 8px. Anti-aliasing is required on the large Michroma digits.
 
 ### Michroma metrics (unitsPerEm 2048)

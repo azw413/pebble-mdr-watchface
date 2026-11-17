@@ -7,7 +7,7 @@ A Pebble watchface inspired by the *Severance* MDR screens. **Read `docs/DESIGN_
 - Use the current PebbleOS SDK from Core Devices / Rebble. Confirm the platform names against the installed SDK before relying on them.
 
 ## Rendering decisions (fixed)
-- Time and date: **Michroma**, anti-aliased, sub-pixel positioned, scalable for the animation. Use **pebble-fctx**, which requires converting Michroma to its font format; check the current toolchain for that.
+- Time and date: **Michroma**, anti-aliased, sub-pixel positioned, scalable for the animation. Use **pebble-fctx**, which requires converting Michroma to its font format (`tools/build_fonts.py`). The outlines are emboldened by 144 units at build time for legibility.
 - Small text (battery %, bin labels): **Silkscreen**, 1-bit, at native 8px (16px on emery/gabbro).
 - Number field: custom thin 5×7 pixel digits in 14px cells (spec §4.2), blitted into one 1-bit bitmap. Never draw per-cell text in the frame loop.
 - Only colours from the Pebble 64-colour palette (see spec §2). No alpha. Colours come from the user's theme (`src/c/theme.c`), never hard-coded.
